@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: black;
+            color: white;
+        }
+        .reelsContainer {
+            height: 80vh;
+            width: 25vw;
+            margin-top: 4em;
+            display: flex;
+            overflow: auto;
+            gap: 2em;
+            flex-direction: column;
+            scroll-snap-type: y mandatory;
+        }
+        .reelsContainer::-webkit-scrollbar {
+            display: none;
+        }
+        .reel {
+            min-height: 75vh;
+            min-width: 25vw;
+            background-color: black;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .reel img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        @media screen and (max-width: 767px) {
+            .reelsContainer {
+                height: 90vh;
+                width: 90vw;
+                margin-top: 2em;
+            }
+            .reel {
+                min-height: 85vh;
+                min-width: 85vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flex justify-center">
+        <div class="reelsContainer" id="reelsContainer">
+            <!-- Images will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        function fetchImagesFromFolder(folderName, numImages) {
+            let reelsContainer = document.getElementById("reelsContainer");
+
+            // Loop to create image elements in ascending order
+            for (let i = 1; i <= numImages; i++) {
+                let imgSrc = `${folderName}/news_summary_${i}.jpg`; // Match Python-generated filenames
+                let imgAlt = `News Summary ${i}`;
+
+                // Create an image element
+                let img = document.createElement("img");
+                img.src = imgSrc;
+                img.alt = imgAlt;
+                img.classList.add("reel-image");
+
+                // Add an error event listener to the image element
+                img.addEventListener("error", function() {
+                    console.log(`Image not available: ${imgSrc}`);
+                });
+
+                // Create a div element to wrap the image
+                let reel = document.createElement("div");
+                reel.className = "reel";
+                reel.appendChild(img);
+
+                // Append the image element to the reelsContainer only if the image is loaded successfully
+                img.addEventListener("load", function() {
+                    reelsContainer.appendChild(reel);
+                });
+            }
+        }
+
+        // Call the function with folder name and number of images
+        fetchImagesFromFolder("static/images", 3); // Replace "static/images" with your actual folder name and 3 with the number of images you have
+    </script>
+</body>
+</html>

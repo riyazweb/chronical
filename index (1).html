@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Image Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: black;
+            color: white;
+        }
+        .feed-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feed-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #6b7280, #4b5563);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #4b5563, #6b7280);
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8">News Image Generator</h1>
+        <form action="/process" method="post" class="max-w-2xl mx-auto">
+            <div class="space-y-4">
+                {% for feed in rss_feeds %}
+                <label class="block feed-card p-6 cursor-pointer">
+                    <input type="radio" name="feed" value="{{ loop.index }}" class="hidden" required>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold">{{ feed.name }}</h2>
+                            <p class="text-gray-400">{{ feed.url }}</p>
+                        </div>
+                        <span class="text-gray-400">→</span>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn-primary w-full mt-8">Generate News Images</button>
+        </form>
+    </div>
+</body>
+</html>
