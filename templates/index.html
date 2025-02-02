@@ -8,51 +8,116 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: black;
+            background: #0a0a0a;
             color: white;
         }
         .feed-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
         }
         .feed-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .feed-card.selected {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-color: rgba(255, 255, 255, 0.3);
         }
         .btn-primary {
-            background: linear-gradient(45deg, #6b7280, #4b5563);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            transition: background 0.3s ease;
+            background: linear-gradient(135deg, #ffffff, #e0e0e0);
+            color: black;
+            transition: all 0.3s ease;
         }
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #4b5563, #6b7280);
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        @keyframes customSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-custom-spin {
+            animation: customSpin 1.2s linear infinite;
         }
     </style>
 </head>
 <body class="font-sans">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center mb-8">News Image Generator</h1>
-        <form action="/process" method="post" class="max-w-2xl mx-auto">
-            <div class="space-y-4">
-                {% for feed in rss_feeds %}
-                <label class="block feed-card p-6 cursor-pointer">
-                    <input type="radio" name="feed" value="{{ loop.index }}" class="hidden" required>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-xl font-semibold">{{ feed.name }}</h2>
-                            <p class="text-gray-400">{{ feed.url }}</p>
-                        </div>
-                        <span class="text-gray-400">→</span>
-                    </div>
-                </label>
-                {% endfor %}
+    <!-- Loading Overlay - initially hidden -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm">
+        <div class="h-full flex items-center justify-center">
+            <div class="text-center">
+                <div class="animate-custom-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto mb-6"></div>
+                <p class="text-xl font-medium text-white">Generating Images...</p>
             </div>
-            <button type="submit" class="btn-primary w-full mt-8">Generate News Images</button>
-        </form>
+        </div>
     </div>
+
+    <div class="flex min-h-screen">
+        <!-- Left scrollbar -->
+        <div class="hidden md:block w-16 border-r border-gray-800/30">
+            <div class="h-full flex items-center justify-center">
+                <div class="w-1 h-32 bg-gradient-to-b from-white/80 to-transparent rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-y-auto px-4 md:px-8 py-12">
+            <div class="max-w-2xl mx-auto">
+                <h1 class="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                    News Image Generator
+                </h1>
+
+                <form id="generatorForm" action="/process" method="post" class="space-y-6">
+                    <div class="space-y-4">
+                        {% for feed in rss_feeds %}
+                        <label class="feed-card block p-6 rounded-xl cursor-pointer">
+                            <input type="radio" name="feed" value="{{ loop.index }}" class="hidden" required>
+                            <div class="flex flex-col">
+                                <h2 class="text-xl font-semibold mb-2">{{ feed.name }}</h2>
+                                <p class="text-gray-400 text-sm break-all">{{ feed.url }}</p>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" disabled id="submitBtn" 
+                            class="btn-primary w-full mt-8 py-4 px-8 rounded-xl text-lg font-semibold opacity-50 cursor-not-allowed">
+                        Generate Images
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('generatorForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        // Enable submit button when a feed is selected
+        document.querySelectorAll('input[type="radio"]').forEach(input => {
+            input.addEventListener('change', () => {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                
+                // Update selected card styling
+                document.querySelectorAll('.feed-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                input.closest('.feed-card').classList.add('selected');
+            });
+        });
+
+        // Only show loading overlay on form submit
+        form.addEventListener('submit', (e) => {
+            if (!form.checkValidity()) return;
+            e.preventDefault();
+            loadingOverlay.classList.remove('hidden');
+            setTimeout(() => form.submit(), 100);
+        });
+    </script>
 </body>
 </html>
