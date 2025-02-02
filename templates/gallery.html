@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             background: black;
@@ -32,12 +33,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         .reel img {
             max-height: 100%;
             max-width: 100%;
             object-fit: contain;
             border-radius: 12px;
+        }
+        .play-icon {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            font-size: 24px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .play-icon:hover {
+            background-color: rgba(0, 0, 0, 0.8);
         }
         @media screen and (max-width: 767px) {
             .reelsContainer {
@@ -67,6 +84,7 @@
             for (let i = 1; i <= numImages; i++) {
                 let imgSrc = `${folderName}/news_summary_${i}.jpg`; // Match Python-generated filenames
                 let imgAlt = `News Summary ${i}`;
+                let audioSrc = `${folderName}/news_summary_${i}.mp3`;
 
                 // Create an image element
                 let img = document.createElement("img");
@@ -74,14 +92,18 @@
                 img.alt = imgAlt;
                 img.classList.add("reel-image");
 
-                // Add an error event listener to the image element
-                img.addEventListener("error", function() {
-                    console.log(`Image not available: ${imgSrc}`);
+                // Create a play icon
+                let playIcon = document.createElement("i");
+                playIcon.classList.add("fas", "fa-play", "play-icon");
+                playIcon.addEventListener("click", function() {
+                    let audio = new Audio(audioSrc);
+                    audio.play();
                 });
 
-                // Create a div element to wrap the image
+                // Create a div element to wrap the image and play icon
                 let reel = document.createElement("div");
                 reel.className = "reel";
+                reel.appendChild(playIcon);
                 reel.appendChild(img);
 
                 // Append the image element to the reelsContainer only if the image is loaded successfully
@@ -92,7 +114,7 @@
         }
 
         // Call the function with folder name and number of images
-        fetchImagesFromFolder("static/images", 3); // Replace "static/images" with your actual folder name and 3 with the number of images you have
+        fetchImagesFromFolder("static/images", 5); // Replace "static/images" with your actual folder name and 3 with the number of images you have
     </script>
 </body>
 </html>
