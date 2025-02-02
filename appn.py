@@ -24,11 +24,14 @@ os.makedirs('static/images', exist_ok=True)
 # Track processed keywords to avoid repetition
 processed_keywords = set()
 
-# List of RSS feeds with names and URLs
 rss_feeds = [
-    {"name": "Times of India", "url": "https://timesofindia.indiatimes.com/rssfeeds/4719148.cms"},
-    {"name": "the hindu", "url": "https://www.thehindu.com/news/international/feeder/default.rss"},
-    {"name": "CNN Top Stories", "url": "https://www.thehindu.com/entertainment/movies/feeder/default.rss"},
+    {"name": "General News", "url": "https://feeds.feedburner.com/NDTV-LatestNews"},
+    {"name": "International News", "url": "https://www.thehindu.com/news/international/feeder/default.rss"},
+    {"name": "Entertainment", "url": "https://www.thehindu.com/entertainment/movies/feeder/default.rss"},
+    {"name": "Education", "url": "https://feeds.bbci.co.uk/news/education/rss.xml"},
+    {"name": "Sports", "url": "https://timesofindia.indiatimes.com/rssfeeds/913168846.cms"},
+    {"name": "Science", "url": "https://moxie.foxnews.com/google-publisher/science.xml"},
+    {"name": "Business", "url": "https://b2b.economictimes.indiatimes.com/rss/news.xml"}
 ]
 
 # Start Ollama server
@@ -172,7 +175,23 @@ def create_news_image(text, keyword, filename):
     canvas.save(f"static/images/{filename}")
     print(f"✅ Saved image: static/images/{filename}")
 
-# Process RSS entries
+from gtts import gTTS
+import os
+
+# Ensure the audio directory exists
+os.makedirs('static/images', exist_ok=True)
+
+# Function to create audio files
+def create_audio(text, filename):
+    """Create an audio file from text using gTTS"""
+    try:
+        tts = gTTS(text=text, lang='en')
+        tts.save(f"static/images/{filename}.mp3")
+        print(f"✅ Saved audio: static/audio/{filename}.mp3")
+    except Exception as e:
+        print(f"🔴 Audio creation failed: {str(e)}")
+
+# Modify the process_rss_entries function to include audio creation
 def process_rss_entries(rss_url):
     """Enhanced RSS processing with better validation"""
     print(f"\n📰 Processing RSS feed: {rss_url}")
@@ -184,7 +203,7 @@ def process_rss_entries(rss_url):
             print(f"🔴 RSS parsing error: {feed.bozo_exception}")
             return
 
-        entries = feed.entries[:3]
+        entries = feed.entries[:5]
         print(f"✅ Found {len(entries)} entries")
 
         for i, entry in enumerate(entries):
@@ -235,6 +254,7 @@ def process_rss_entries(rss_url):
                     keyword,
                     f"news_summary_{i+1}.jpg"
                 )
+                create_audio(result['text'], f"news_summary_{i+1}")  # Create audio file
 
             except json.JSONDecodeError:
                 print(f"🔴 Invalid JSON: {output}")
@@ -243,7 +263,6 @@ def process_rss_entries(rss_url):
 
     except Exception as e:
         print(f"🔴 RSS processing failed: {str(e)}")
-
 # Flask routes
 @app.route('/')
 def index():
