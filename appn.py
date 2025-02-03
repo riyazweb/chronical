@@ -157,7 +157,7 @@ def create_news_image(text, keyword, filename):
         font = ImageFont.load_default()
 
     # Wrap text to fit within 600px width, adjust the width value as needed
-    wrapped_text = textwrap.wrap(text, width=40)  # Adjust to fit within 600px width
+    wrapped_text = textwrap.wrap(text, width=35)  # Adjust to fit within 600px width
 
     # Calculate text position (centered)
     text_height = sum(draw.textbbox((0, 0), line, font=font)[3] for line in wrapped_text)
