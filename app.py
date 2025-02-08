@@ -31,7 +31,7 @@ rss_feeds = [
     {"name": "Education", "url": "https://feeds.bbci.co.uk/news/education/rss.xml"},
     {"name": "Sports", "url": "https://timesofindia.indiatimes.com/rssfeeds/913168846.cms"},
     {"name": "Science", "url": "https://moxie.foxnews.com/google-publisher/science.xml"},
-    {"name": "Business", "url": "https://b2b.economictimes.indiatimes.com/rss/news.xml"}
+    {"name": "Business", "url": "https://www.thehindu.com/business/Economy/feeder/default.rss"}
 ]
 
 # Keep track of processed entry counts per feed URL
