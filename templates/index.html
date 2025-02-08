@@ -1,123 +1,194 @@
+ 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>News Image Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background: #0a0a0a;
-            color: white;
-        }
-        .feed-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s ease;
-        }
-        .feed-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-        .feed-card.selected {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #ffffff, #e0e0e0);
-            color: black;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover:not(:disabled) {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-        }
-        @keyframes customSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .animate-custom-spin {
-            animation: customSpin 1.2s linear infinite;
-        }
+      body {
+        background: #0a0a0a;
+        color: white;
+        font-family: sans-serif; /* Add default font-family */
+      }
+      /* Improved 3D Carousel Styles */
+      .carousel-container {
+        perspective: 1000px;
+        margin-bottom: 24px; /* Add margin below carousel */
+      }
+
+      .carousel-track {
+        transform-style: preserve-3d;
+        transition: transform 1s;
+        position: relative;
+        width: 300px;
+        height: 400px;
+      }
+
+      .carousel-item {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.5s;
+      }
+
+      /* Arrange items in a circular layout */
+      .carousel-item:nth-child(1) {
+        transform: rotateY(0deg) translateZ(300px);
+      }
+      .carousel-item:nth-child(2) {
+        transform: rotateY(120deg) translateZ(300px);
+      }
+      .carousel-item:nth-child(3) {
+        transform: rotateY(240deg) translateZ(300px);
+      }
+      .feed-card {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s ease;
+      }
+      .feed-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      }
+      .feed-card.selected {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #ffffff, #e0e0e0);
+        color: black;
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover:not(:disabled) {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      }
+      @keyframes customSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .animate-custom-spin {
+        animation: customSpin 1.2s linear infinite;
+      }
     </style>
-</head>
-<body class="font-sans">
-    <!-- Loading Overlay - initially hidden -->
-    <div id="loadingOverlay" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm">
-        <div class="h-full flex items-center justify-center">
-            <div class="text-center">
-                <div class="animate-custom-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto mb-6"></div>
-                <p class="text-xl font-medium text-white">Generating Images...</p>
-            </div>
+  </head>
+  <body class="bg-black text-white font-sans">
+    <!-- Header Section -->
+    <header class="py-8 text-center">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">News Image Generator</h1>
+      <p class="mt-2 text-lg">AI Powered News Image Creation</p>
+    </header>
+
+    <!-- 3D Carousel Section -->
+    <div class="flex h-[600px] items-center justify-center">
+      <div class="carousel-container">
+        <div class="carousel-track" id="carouselTrack">
+          <div class="carousel-item">
+            <img src="https://th.bing.com/th/id/OIP.n5BulOa9EeyETqSrO8rBhwHaNK?rs=1&pid=ImgDetMain" alt="News 1" class="h-full w-full rounded-xl object-cover shadow-2xl" />
+          </div>
+          <div class="carousel-item">
+            <img src="https://images.unsplash.com/photo-1531966662811-c6501e46eda6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80" alt="News 2" class="h-full w-full rounded-xl object-cover shadow-2xl" />
+          </div>
+          <div class="carousel-item">
+            <img src="https://cdn.wallpapersafari.com/53/68/XVAbeq.jpg" alt="News 3" class="h-full w-full rounded-xl object-cover shadow-2xl" />
+          </div>
         </div>
+      </div>
     </div>
 
-    <div class="flex min-h-screen">
-        <!-- Left scrollbar -->
-        <div class="hidden md:block w-16 border-r border-gray-800/30">
-            <div class="h-full flex items-center justify-center">
-                <div class="w-1 h-32 bg-gradient-to-b from-white/80 to-transparent rounded-full"></div>
-            </div>
+    <!-- RSS Feeds Section -->
+    <div class="container mx-auto px-4 py-8">
+      <form id="generatorForm" action="/process" method="post" class="space-y-6 max-w-2xl mx-auto">
+        <div class="space-y-4">
+            {% for feed in rss_feeds %}
+            <label class="feed-card block p-6 rounded-xl cursor-pointer">
+                <input type="radio" name="feed" value="{{ loop.index }}" class="hidden" required>
+                <div class="flex flex-col">
+                    <h2 class="text-xl font-semibold mb-2">{{ feed.name }}</h2>
+                    <p class="text-gray-400 text-sm break-all">{{ feed.url }}</p>
+                </div>
+            </label>
+            {% endfor %}
         </div>
 
-        <!-- Main content -->
-        <div class="flex-1 overflow-y-auto px-4 md:px-8 py-12">
-            <div class="max-w-2xl mx-auto">
-                <h1 class="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                    News Image Generator
-                </h1>
-
-                <form id="generatorForm" action="/process" method="post" class="space-y-6">
-                    <div class="space-y-4">
-                        {% for feed in rss_feeds %}
-                        <label class="feed-card block p-6 rounded-xl cursor-pointer">
-                            <input type="radio" name="feed" value="{{ loop.index }}" class="hidden" required>
-                            <div class="flex flex-col">
-                                <h2 class="text-xl font-semibold mb-2">{{ feed.name }}</h2>
-                                <p class="text-gray-400 text-sm break-all">{{ feed.url }}</p>
-                            </div>
-                        </label>
-                        {% endfor %}
-                    </div>
-
-                    <button type="submit" disabled id="submitBtn" 
-                            class="btn-primary w-full mt-8 py-4 px-8 rounded-xl text-lg font-semibold opacity-50 cursor-not-allowed">
-                        Generate Images
-                    </button>
-                </form>
-            </div>
-        </div>
+        <button
+          type="submit"
+          disabled
+          id="submitBtn"
+          class="btn-primary w-full mt-8 py-4 px-8 rounded-xl text-lg font-semibold opacity-50 cursor-not-allowed"
+        >
+          Generate Images
+        </button>
+      </form>
     </div>
 
+    <!-- JavaScript for Carousel Rotation and Swipe Gestures -->
     <script>
-        const form = document.getElementById('generatorForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        
-        // Enable submit button when a feed is selected
-        document.querySelectorAll('input[type="radio"]').forEach(input => {
-            input.addEventListener('change', () => {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                
-                // Update selected card styling
-                document.querySelectorAll('.feed-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                input.closest('.feed-card').classList.add('selected');
-            });
+      // Wait until the DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        const carouselTrack = document.getElementById("carouselTrack");
+        let currentRotation = 0;
+        let startX = null;
+        const swipeThreshold = 50; // Minimum px to consider it a swipe
+
+        // Auto-rotate every 3 seconds
+        const autoRotate = setInterval(() => {
+          currentRotation -= 120; // Rotate by 120° for 3 items
+          carouselTrack.style.transform = `rotateY(${currentRotation}deg)`;
+        }, 3000);
+
+        // Touch start event: record the starting X coordinate
+        carouselTrack.addEventListener("touchstart", (e) => {
+          startX = e.touches[0].clientX;
         });
 
-        // Only show loading overlay on form submit
-        form.addEventListener('submit', (e) => {
-            if (!form.checkValidity()) return;
-            e.preventDefault();
-            loadingOverlay.classList.remove('hidden');
-            setTimeout(() => form.submit(), 100);
+        // Touch end event: compare the end X coordinate to determine swipe direction
+        carouselTrack.addEventListener("touchend", (e) => {
+          const endX = e.changedTouches[0].clientX;
+          const diffX = endX - startX;
+
+          if (Math.abs(diffX) > swipeThreshold) {
+            // If swipe right, rotate carousel clockwise; if left, rotate counter-clockwise
+            if (diffX > 0) {
+              currentRotation += 120;
+            } else {
+              currentRotation -= 120;
+            }
+            carouselTrack.style.transform = `rotateY(${currentRotation}deg)`;
+          }
+          startX = null;
         });
+      });
+
+      const form = document.getElementById("generatorForm");
+      const submitBtn = document.getElementById("submitBtn");
+
+      // Enable submit button when a feed is selected
+      document
+        .querySelectorAll('input[type="radio"]')
+        .forEach((input) => {
+          input.addEventListener("change", () => {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+
+            // Update selected card styling
+            document.querySelectorAll(".feed-card").forEach((card) => {
+              card.classList.remove("selected");
+            });
+            input.closest(".feed-card").classList.add("selected");
+          });
+        });
+
+      // Form submit now just submits directly
+      form.addEventListener("submit", (e) => {
+        if (!form.checkValidity()) return;
+        // e.preventDefault(); // Remove preventDefault to allow normal submission
+      });
     </script>
-</body>
+  </body>
 </html>

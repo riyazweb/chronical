@@ -11,6 +11,8 @@
         body {
             background: black;
             color: white;
+            margin: 0;
+            overflow-x: hidden;
         }
         .reelsContainer {
             height: 80vh;
@@ -56,6 +58,35 @@
         .play-icon:hover {
             background-color: rgba(0, 0, 0, 0.8);
         }
+        .load-more-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            pointer-events: auto;
+        }
+        .load-more-button {
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            font-weight: bold
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .load-more-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .load-more-button:disabled {
+            color: gray;
+            border-color: gray;
+            cursor: not-allowed;
+        }
+        .load-more-button:disabled:hover {
+            background-color: transparent;
+        }
+
         @media screen and (max-width: 767px) {
             .reelsContainer {
                 height: 90vh;
@@ -72,49 +103,117 @@
 <body>
     <div class="flex justify-center">
         <div class="reelsContainer" id="reelsContainer">
-            <!-- Images will be dynamically added here -->
+            <!-- Images will be loaded here -->
         </div>
+    
+    </div>
+
+    <div class="load-more-container">
+        <button id="loadMoreButton" class="load-more-button" onclick="loadMoreImages()" >Load More</button>
     </div>
 
     <script>
-        function fetchImagesFromFolder(folderName, numImages) {
-            let reelsContainer = document.getElementById("reelsContainer");
+        console.log('gallery.html script start');
+        let audioPlaying = null;
+        let imageFiles = {{ image_files|tojson }};
+        console.log('imageFiles on load:', imageFiles); // Log imageFiles right after template variable assignment
+        let displayedImageCount = 0;
+        const imagesPerLoadInitial = 3;
+        const imagesPerLoadMore = 3;
+        const reelsContainer = document.getElementById('reelsContainer');
+        const loadMoreButton = document.getElementById('loadMoreButton');
+        const rss_url = "{{ rss_url }}";
+        let totalProcessedCount = {{ processed_count }};
+        console.log('totalProcessedCount on load:', totalProcessedCount); // Log totalProcessedCount
 
-            // Loop to create image elements in ascending order
-            for (let i = 1; i <= numImages; i++) {
-                let imgSrc = `${folderName}/news_summary_${i}.jpg`; // Match Python-generated filenames
-                let imgAlt = `News Summary ${i}`;
-                let audioSrc = `${folderName}/news_summary_${i}.mp3`;
+        function playAudio(filename) {
+            if (audioPlaying) {
+                audioPlaying.pause();
+                audioPlaying.currentTime = 0;
+            }
+            let audioSrc = `static/images/${filename}.mp3`;
+            audioPlaying = new Audio(audioSrc);
+            audioPlaying.play();
+        }
 
-                // Create an image element
-                let img = document.createElement("img");
-                img.src = imgSrc;
-                img.alt = imgAlt;
-                img.classList.add("reel-image");
+        function loadMoreImages() {
+            loadMoreButton.textContent = 'Loading...';
+            loadMoreButton.disabled = true;
+            fetch(`/load_more_images?rss_url=${encodeURIComponent(rss_url)}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('load_more_images response data:', data); // Log the response data
+                    if (data.image_files && data.image_files.length > 0) {
+                        imageFiles = imageFiles.concat(data.image_files);
+                        totalProcessedCount = data.processed_count;
+                        loadImagesToGallery(imagesPerLoadMore);
+                    }
+                    loadMoreButton.textContent = 'Load More';
+                    loadMoreButton.disabled = false;
+                    updateLoadMoreButtonVisibility();
 
-                // Create a play icon
-                let playIcon = document.createElement("i");
-                playIcon.classList.add("fas", "fa-play", "play-icon");
-                playIcon.addEventListener("click", function() {
-                    let audio = new Audio(audioSrc);
-                    audio.play();
+                })
+                .catch(error => {
+                    console.error("Error loading more images:", error);
+                    loadMoreButton.textContent = 'Load More';
+                    loadMoreButton.disabled = false;
                 });
+        }
 
-                // Create a div element to wrap the image and play icon
-                let reel = document.createElement("div");
-                reel.className = "reel";
-                reel.appendChild(playIcon);
-                reel.appendChild(img);
 
-                // Append the image element to the reelsContainer only if the image is loaded successfully
-                img.addEventListener("load", function() {
-                    reelsContainer.appendChild(reel);
-                });
+        function loadImagesToGallery(count) {
+            console.log('loadImagesToGallery called with count:', count);
+             for (let i = 0; i < count; i++) {
+                if (displayedImageCount < imageFiles.length) {
+                    const index = displayedImageCount;
+                    const filename = imageFiles[index];
+                    console.log('Adding reel for:', filename, 'index:', index, 'displayedImageCount:', displayedImageCount);
+                    const reelDiv = document.createElement('div');
+                    reelDiv.classList.add('reel');
+                    reelDiv.innerHTML = `
+                        <i class="fas fa-play play-icon" onclick="playAudio('${filename.replace('.jpg', '')}')"></i>
+                        <img src="{{ url_for('static', filename='images/') }}${filename}" alt="News Summary" class="reel-image">
+                    `;
+                    reelsContainer.appendChild(reelDiv);
+                    displayedImageCount++;
+                } else {
+                    console.log('loadImagesToGallery: Breaking loop, no more images to display');
+                    break;
+                }
+            }
+            updateLoadMoreButtonVisibility();
+        }
+
+
+        function updateLoadMoreButtonVisibility() {
+            console.log('updateLoadMoreButtonVisibility: displayedImageCount:', displayedImageCount, 'totalProcessedCount:', totalProcessedCount, 'imageFiles.length:', imageFiles.length); // Log all relevant values
+            if (displayedImageCount >= totalProcessedCount ) {
+                console.log('updateLoadMoreButtonVisibility: Hiding button - displayedImageCount >= totalProcessedCount');
+               
+            } else if (imageFiles.length > 0 && displayedImageCount < totalProcessedCount) {
+                console.log('updateLoadMoreButtonVisibility: Showing button - more images to load');
+                 loadMoreButton.style.display = 'block';
+                  loadMoreButton.textContent = 'Load More';
+            } else {
+                console.log('updateLoadMoreButtonVisibility: Hiding button - default case');
+              
             }
         }
 
-        // Call the function with folder name and number of images
-        fetchImagesFromFolder("static/images", 5); // Replace "static/images" with your actual folder name and 3 with the number of images you have
+
+        // Initial load of images
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded event fired');
+            console.log('DOMContentLoaded: imageFiles.length before initial load:', imageFiles.length); // Log imageFiles length
+            console.log('DOMContentLoaded: totalProcessedCount before initial load:', totalProcessedCount); // Log totalProcessedCount before initial load
+            if (imageFiles && imageFiles.length > 0) {
+                loadImagesToGallery(imagesPerLoadInitial);
+            } else {
+                console.log('DOMContentLoaded: imageFiles is empty or null, not loading initial images');
+            }
+            updateLoadMoreButtonVisibility();
+        });
+
     </script>
 </body>
 </html>
